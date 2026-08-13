@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Public Comment</title>
-
+  <title>SendTheMessage</title>
   <link rel="stylesheet" href="style.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -13,173 +11,254 @@
 
 <body>
 
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💌</div>
+      <div>
+        <h1>SendTheMessage</h1>
+        <p>Kirim pesan untuk seseorang.</p>
+      </div>
+    </div>
+  </header>
+
+
   <main class="container">
 
-    <!-- HEADER -->
-    <header class="header">
-      <div>
-        <h1>💬 Public Comment</h1>
-        <p>Kirim komentar atau pesan untuk seseorang.</p>
-      </div>
-
-      <div id="connectionStatus" class="status">
-        ● Menghubungkan...
-      </div>
-    </header>
-
-
-    <!-- ERROR / SUCCESS -->
     <div id="notice" class="notice"></div>
 
 
-    <!-- ========================= -->
-    <!-- PESAN -->
-    <!-- ========================= -->
+    <!-- HOME -->
+    <section id="homePage" class="page active">
 
-    <section class="card">
+      <div class="hero">
+        <span class="hero-icon">💌</span>
 
-      <h2>📨 Kirim Pesan</h2>
+        <h2>Kirim pesan untuk seseorang</h2>
 
-      <p class="description">
-        Kirim pesan kepada seseorang menggunakan kode penerima.
-      </p>
+        <p>
+          Pilih angkatan, tulis nama penerima,
+          lalu kirim pesanmu.
+        </p>
 
-      <input
-        id="messageSender"
-        type="text"
-        maxlength="30"
-        placeholder="Nama kamu"
-        autocomplete="off"
-      >
+        <div class="hero-buttons">
 
-      <input
-        id="messageRecipient"
-        type="text"
-        maxlength="30"
-        placeholder="Untuk siapa?"
-        autocomplete="off"
-      >
+          <button
+            class="primary-btn"
+            onclick="showPage('sendPage')"
+          >
+            ✉️ Buat Pesan
+          </button>
 
-      <input
-        id="recipientCode"
-        type="text"
-        maxlength="30"
-        placeholder="Kode penerima"
-        autocomplete="off"
-      >
+          <button
+            class="secondary-btn"
+            onclick="showPage('searchPage')"
+          >
+            🔎 Cari Pesan
+          </button>
 
-      <textarea
-        id="messageContent"
-        maxlength="500"
-        placeholder="Tulis pesan..."
-      ></textarea>
-
-      <div class="bottom-row">
-
-        <span id="messageCounter">
-          0 / 500
-        </span>
-
-        <button id="sendMessageButton">
-          Kirim Pesan
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- ========================= -->
-    <!-- CARI PESAN -->
-    <!-- ========================= -->
-
-    <section class="card">
-
-      <h2>🔎 Cari Pesan Kamu</h2>
-
-      <p class="description">
-        Masukkan kode penerima untuk melihat pesan yang ditujukan kepadamu.
-      </p>
-
-      <div class="search-row">
-
-        <input
-          id="searchCode"
-          type="text"
-          maxlength="30"
-          placeholder="Masukkan kode penerima"
-          autocomplete="off"
-        >
-
-        <button id="searchButton">
-          Cari
-        </button>
-
-      </div>
-
-      <div id="messageResults"></div>
-
-    </section>
-
-
-    <!-- ========================= -->
-    <!-- KOMENTAR -->
-    <!-- ========================= -->
-
-    <section>
-
-      <div class="section-header">
-
-        <div>
-          <h2>💬 Komentar Publik</h2>
-          <p>Komentar terbaru muncul paling atas.</p>
         </div>
-
       </div>
 
 
-      <section class="card">
+      <div class="generation-grid">
 
-        <input
-          id="username"
-          type="text"
-          maxlength="30"
-          placeholder="Nama / username"
-          autocomplete="off"
+        <button
+          onclick="quickGeneration('angkatan_11')"
         >
+          <span>🎓</span>
+          <strong>Angkatan 11</strong>
+          <small>Kirim pesan</small>
+        </button>
 
-        <textarea
-          id="content"
-          maxlength="500"
-          placeholder="Tulis komentar..."
-        ></textarea>
+        <button
+          onclick="quickGeneration('angkatan_12')"
+        >
+          <span>🎓</span>
+          <strong>Angkatan 12</strong>
+          <small>Kirim pesan</small>
+        </button>
 
-        <div class="bottom-row">
+        <button
+          onclick="quickGeneration('angkatan_13')"
+        >
+          <span>🎓</span>
+          <strong>Angkatan 13</strong>
+          <small>Kirim pesan</small>
+        </button>
 
-          <span id="counter">
-            0 / 500
-          </span>
+      </div>
 
-          <button id="sendButton">
-            Kirim Komentar
+    </section>
+
+
+    <!-- SEND -->
+    <section id="sendPage" class="page">
+
+      <button
+        class="back-btn"
+        onclick="showPage('homePage')"
+      >
+        ← Kembali
+      </button>
+
+      <div class="card">
+
+        <h2>✉️ Buat Pesan</h2>
+
+        <p class="muted">
+          Pesanmu akan ditujukan kepada nama yang kamu masukkan.
+        </p>
+
+
+        <label>Angkatan</label>
+
+        <div class="generation-select">
+
+          <button
+            data-generation="angkatan_11"
+            onclick="selectGeneration('angkatan_11')"
+          >
+            Angkatan 11
+          </button>
+
+          <button
+            data-generation="angkatan_12"
+            onclick="selectGeneration('angkatan_12')"
+          >
+            Angkatan 12
+          </button>
+
+          <button
+            data-generation="angkatan_13"
+            onclick="selectGeneration('angkatan_13')"
+          >
+            Angkatan 13
           </button>
 
         </div>
 
-      </section>
+
+        <label for="recipient">
+          Untuk siapa?
+        </label>
+
+        <input
+          id="recipient"
+          maxlength="30"
+          placeholder="Nama penerima"
+          autocomplete="off"
+        >
 
 
-      <div id="comments">
+        <label for="sender">
+          Dari
+        </label>
 
-        <div class="loading">
-          Memuat komentar...
+        <div class="sender-row">
+
+          <input
+            id="sender"
+            maxlength="30"
+            placeholder="Nama kamu"
+            autocomplete="off"
+          >
+
+          <button
+            class="anonymous-btn"
+            onclick="setAnonymous()"
+          >
+            Anonymous
+          </button>
+
+        </div>
+
+
+        <label for="message">
+          Pesan
+        </label>
+
+        <textarea
+          id="message"
+          maxlength="500"
+          placeholder="Tulis pesan kamu..."
+        ></textarea>
+
+
+        <div class="form-footer">
+
+          <span id="messageCounter">
+            0 / 500
+          </span>
+
+          <button
+            id="sendBtn"
+            class="primary-btn"
+            onclick="sendMessage()"
+          >
+            Kirim 💌
+          </button>
+
         </div>
 
       </div>
 
     </section>
 
+
+    <!-- SEARCH -->
+    <section id="searchPage" class="page">
+
+      <button
+        class="back-btn"
+        onclick="showPage('homePage')"
+      >
+        ← Kembali
+      </button>
+
+
+      <div class="search-card">
+
+        <span class="search-icon">🔎</span>
+
+        <h2>Cari Pesan Kamu</h2>
+
+        <p>
+          Masukkan nama untuk melihat pesan
+          yang ditujukan kepadamu.
+        </p>
+
+
+        <div class="search-box">
+
+          <input
+            id="searchName"
+            maxlength="30"
+            placeholder="Masukkan nama..."
+            autocomplete="off"
+          >
+
+          <button
+            onclick="searchMessages()"
+            id="searchBtn"
+          >
+            Cari
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div id="results"></div>
+
+    </section>
+
   </main>
+
+
+  <footer>
+    <p>SendTheMessage • Public Message</p>
+  </footer>
 
 
   <script src="script.js"></script>
