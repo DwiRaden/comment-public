@@ -1,5 +1,5 @@
 // ==========================================
-// SUPABASE
+// SUPABASE CONFIG
 // ==========================================
 
 const SUPABASE_URL =
@@ -8,11 +8,10 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_U2at4VScoGw7vFR8MkxiQw_y9q-kGmf";
 
-const db =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
 // ==========================================
@@ -39,6 +38,19 @@ const counter =
 
 
 // ==========================================
+// CHECK SUPABASE
+// ==========================================
+
+if (!window.supabase) {
+
+  showError(
+    "Supabase gagal dimuat. Periksa koneksi internet."
+  );
+
+}
+
+
+// ==========================================
 // COUNTER
 // ==========================================
 
@@ -57,11 +69,8 @@ contentInput.addEventListener("input", () => {
 function showError(message) {
 
   errorBox.textContent = message;
-  errorBox.style.display = "block";
 
-  setTimeout(() => {
-    errorBox.style.display = "none";
-  }, 4000);
+  errorBox.style.display = "block";
 
 }
 
@@ -100,10 +109,17 @@ function formatDate(date) {
 
 
 // ==========================================
-// LOAD
+// LOAD COMMENTS
 // ==========================================
 
 async function loadComments() {
+
+  commentsContainer.innerHTML = `
+    <div class="loading">
+      Memuat komentar...
+    </div>
+  `;
+
 
   const {
     data,
@@ -115,18 +131,23 @@ async function loadComments() {
       ascending: true
     });
 
+
   if (error) {
 
-    console.error(error);
+    console.error("LOAD ERROR:", error);
 
     commentsContainer.innerHTML = `
       <div class="empty">
         Gagal memuat komentar.
+        <br>
+        <small>${escapeHTML(error.message)}</small>
       </div>
     `;
 
     return;
+
   }
+
 
   renderComments(data);
 
@@ -147,6 +168,7 @@ function renderComments(data) {
         comment.parent_id === null
     );
 
+
   if (mainComments.length === 0) {
 
     commentsContainer.innerHTML = `
@@ -156,12 +178,17 @@ function renderComments(data) {
     `;
 
     return;
+
   }
+
 
   mainComments.forEach(comment => {
 
     commentsContainer.appendChild(
-      createComment(comment, data)
+      createComment(
+        comment,
+        data
+      )
     );
 
   });
@@ -183,11 +210,13 @@ function createComment(
 
   wrapper.className = "comment";
 
+
   const replies =
     allComments.filter(
       item =>
         item.parent_id === comment.id
     );
+
 
   wrapper.innerHTML = `
 
@@ -245,6 +274,7 @@ function createComment(
     </div>
 
     <div class="replies"></div>
+
   `;
 
 
@@ -258,6 +288,7 @@ function createComment(
       document.createElement("div");
 
     replyElement.className = "reply";
+
 
     replyElement.innerHTML = `
 
@@ -278,6 +309,7 @@ function createComment(
       </div>
 
     `;
+
 
     repliesContainer.appendChild(
       replyElement
@@ -302,6 +334,10 @@ function toggleReply(id) {
       `reply-box-${id}`
     );
 
+
+  if (!box) return;
+
+
   box.classList.toggle("active");
 
 }
@@ -313,6 +349,9 @@ function toggleReply(id) {
 
 async function sendComment() {
 
+  console.log("SEND COMMENT DIPANGGIL");
+
+
   const username =
     usernameInput.value.trim();
 
@@ -321,59 +360,143 @@ async function sendComment() {
 
 
   if (!username) {
-    showError("Masukkan nama / username.");
+
+    showError(
+      "❌ Masukkan nama / username."
+    );
+
+    usernameInput.focus();
+
     return;
+
   }
+
 
   if (!content) {
-    showError("Komentar tidak boleh kosong.");
+
+    showError(
+      "❌ Komentar tidak boleh kosong."
+    );
+
+    contentInput.focus();
+
     return;
+
   }
+
 
   if (username.length > 30) {
-    showError("Username maksimal 30 karakter.");
+
+    showError(
+      "❌ Username maksimal 30 karakter."
+    );
+
     return;
+
   }
 
+
   if (content.length > 500) {
-    showError("Komentar maksimal 500 karakter.");
+
+    showError(
+      "❌ Komentar maksimal 500 karakter."
+    );
+
     return;
+
   }
 
 
   sendButton.disabled = true;
-  sendButton.textContent = "Mengirim...";
+
+  sendButton.textContent =
+    "Mengirim...";
 
 
-  const {
-    error
-  } = await db
-    .from("comments")
-    .insert({
-      username: username,
-      content: content,
-      parent_id: null
-    });
+  errorBox.style.display = "none";
 
 
-  sendButton.disabled = false;
-  sendButton.textContent = "Kirim Komentar";
+  try {
+
+    const {
+      data,
+      error
+    } = await db
+      .from("comments")
+      .insert({
+
+        username: username,
+
+        content: content,
+
+        parent_id: null
+
+      })
+      .select();
 
 
-  if (error) {
+    if (error) {
 
-    console.error(error);
+      console.error(
+        "SUPABASE INSERT ERROR:",
+        error
+      );
 
-    showError("Komentar gagal dikirim.");
+      showError(
+        "❌ Gagal: " +
+        error.message
+      );
 
-    return;
+      return;
+
+    }
+
+
+    console.log(
+      "COMMENT BERHASIL:",
+      data
+    );
+
+
+    contentInput.value = "";
+
+    counter.textContent =
+      "0 / 500";
+
+
+    sendButton.textContent =
+      "Terkirim ✓";
+
+
+    await loadComments();
+
+
+    setTimeout(() => {
+
+      sendButton.textContent =
+        "Kirim Komentar";
+
+    }, 1500);
+
+
+  } catch (error) {
+
+    console.error(
+      "JAVASCRIPT ERROR:",
+      error
+    );
+
+
+    showError(
+      "❌ Error: " +
+      error.message
+    );
+
+  } finally {
+
+    sendButton.disabled = false;
+
   }
-
-
-  contentInput.value = "";
-  counter.textContent = "0 / 500";
-
-  await loadComments();
 
 }
 
@@ -389,7 +512,7 @@ async function sendReply(parentId) {
       `reply-name-${parentId}`
     );
 
-  const replyContentInput =
+  const replyInput =
     document.getElementById(
       `reply-content-${parentId}`
     );
@@ -399,27 +522,28 @@ async function sendReply(parentId) {
     nameInput.value.trim();
 
   const content =
-    replyContentInput.value.trim();
+    replyInput.value.trim();
 
 
   if (!username) {
-    showError("Masukkan nama / username.");
+
+    showError(
+      "❌ Masukkan nama / username."
+    );
+
     return;
+
   }
+
 
   if (!content) {
-    showError("Balasan tidak boleh kosong.");
-    return;
-  }
 
-  if (username.length > 30) {
-    showError("Username maksimal 30 karakter.");
-    return;
-  }
+    showError(
+      "❌ Balasan tidak boleh kosong."
+    );
 
-  if (content.length > 500) {
-    showError("Balasan maksimal 500 karakter.");
     return;
+
   }
 
 
@@ -428,19 +552,30 @@ async function sendReply(parentId) {
   } = await db
     .from("comments")
     .insert({
+
       username: username,
+
       content: content,
+
       parent_id: parentId
+
     });
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "REPLY ERROR:",
+      error
+    );
 
-    showError("Balasan gagal dikirim.");
+    showError(
+      "❌ Gagal: " +
+      error.message
+    );
 
     return;
+
   }
 
 
@@ -469,6 +604,16 @@ db
     }
   )
   .subscribe();
+
+
+// ==========================================
+// BUTTON EVENT
+// ==========================================
+
+sendButton.addEventListener(
+  "click",
+  sendComment
+);
 
 
 // ==========================================
