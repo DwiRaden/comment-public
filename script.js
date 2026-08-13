@@ -1,12 +1,12 @@
 // ==========================================
-// SUPABASE CONFIG
+// SUPABASE
 // ==========================================
 
 const SUPABASE_URL =
   "https://blfkirpgfyekzzjzjdpe.supabase.co";
 
 const SUPABASE_KEY =
-  "PASTE_PUBLISHABLE_KEY_DI_SINI";
+  "sb_publishable_U2at4VScoGw7vFR8MkxiQw_y9q-kGmf";
 
 const db =
   window.supabase.createClient(
@@ -39,7 +39,7 @@ const counter =
 
 
 // ==========================================
-// CHARACTER COUNTER
+// COUNTER
 // ==========================================
 
 contentInput.addEventListener("input", () => {
@@ -60,9 +60,7 @@ function showError(message) {
   errorBox.style.display = "block";
 
   setTimeout(() => {
-
     errorBox.style.display = "none";
-
   }, 4000);
 
 }
@@ -85,7 +83,7 @@ function escapeHTML(text) {
 
 
 // ==========================================
-// FORMAT DATE
+// DATE
 // ==========================================
 
 function formatDate(date) {
@@ -102,7 +100,7 @@ function formatDate(date) {
 
 
 // ==========================================
-// LOAD COMMENTS
+// LOAD
 // ==========================================
 
 async function loadComments() {
@@ -136,7 +134,7 @@ async function loadComments() {
 
 
 // ==========================================
-// RENDER COMMENTS
+// RENDER
 // ==========================================
 
 function renderComments(data) {
@@ -162,13 +160,9 @@ function renderComments(data) {
 
   mainComments.forEach(comment => {
 
-    const element =
-      createComment(
-        comment,
-        data
-      );
-
-    commentsContainer.appendChild(element);
+    commentsContainer.appendChild(
+      createComment(comment, data)
+    );
 
   });
 
@@ -251,7 +245,6 @@ function createComment(
     </div>
 
     <div class="replies"></div>
-
   `;
 
 
@@ -328,41 +321,22 @@ async function sendComment() {
 
 
   if (!username) {
-
-    showError(
-      "Masukkan nama / username."
-    );
-
+    showError("Masukkan nama / username.");
     return;
   }
-
 
   if (!content) {
-
-    showError(
-      "Komentar tidak boleh kosong."
-    );
-
+    showError("Komentar tidak boleh kosong.");
     return;
   }
-
 
   if (username.length > 30) {
-
-    showError(
-      "Username maksimal 30 karakter."
-    );
-
+    showError("Username maksimal 30 karakter.");
     return;
   }
 
-
   if (content.length > 500) {
-
-    showError(
-      "Komentar maksimal 500 karakter."
-    );
-
+    showError("Komentar maksimal 500 karakter.");
     return;
   }
 
@@ -376,26 +350,21 @@ async function sendComment() {
   } = await db
     .from("comments")
     .insert({
-
       username: username,
       content: content,
       parent_id: null
-
     });
 
 
   sendButton.disabled = false;
-  sendButton.textContent =
-    "Kirim Komentar";
+  sendButton.textContent = "Kirim Komentar";
 
 
   if (error) {
 
     console.error(error);
 
-    showError(
-      "Komentar gagal dikirim."
-    );
+    showError("Komentar gagal dikirim.");
 
     return;
   }
@@ -420,7 +389,7 @@ async function sendReply(parentId) {
       `reply-name-${parentId}`
     );
 
-  const contentInputReply =
+  const replyContentInput =
     document.getElementById(
       `reply-content-${parentId}`
     );
@@ -430,45 +399,26 @@ async function sendReply(parentId) {
     nameInput.value.trim();
 
   const content =
-    contentInputReply.value.trim();
+    replyContentInput.value.trim();
 
 
   if (!username) {
-
-    showError(
-      "Masukkan nama / username."
-    );
-
+    showError("Masukkan nama / username.");
     return;
   }
-
 
   if (!content) {
-
-    showError(
-      "Balasan tidak boleh kosong."
-    );
-
+    showError("Balasan tidak boleh kosong.");
     return;
   }
-
 
   if (username.length > 30) {
-
-    showError(
-      "Username maksimal 30 karakter."
-    );
-
+    showError("Username maksimal 30 karakter.");
     return;
   }
 
-
   if (content.length > 500) {
-
-    showError(
-      "Balasan maksimal 500 karakter."
-    );
-
+    showError("Balasan maksimal 500 karakter.");
     return;
   }
 
@@ -478,11 +428,9 @@ async function sendReply(parentId) {
   } = await db
     .from("comments")
     .insert({
-
       username: username,
       content: content,
       parent_id: parentId
-
     });
 
 
@@ -490,9 +438,7 @@ async function sendReply(parentId) {
 
     console.error(error);
 
-    showError(
-      "Balasan gagal dikirim."
-    );
+    showError("Balasan gagal dikirim.");
 
     return;
   }
