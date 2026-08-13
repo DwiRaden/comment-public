@@ -1,6 +1,6 @@
-// ==========================================
-// SUPABASE CONFIG
-// ==========================================
+// ======================================================
+// SUPABASE
+// ======================================================
 
 const SUPABASE_URL =
   "https://blfkirpgfyekzzjzjdpe.supabase.co";
@@ -8,21 +8,33 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_U2at4VScoGw7vFR8MkxiQw_y9q-kGmf";
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-// ==========================================
-// ELEMENT
-// ==========================================
+// ======================================================
+// ELEMENTS
+// ======================================================
 
+const notice =
+  document.getElementById("notice");
+
+const connectionStatus =
+  document.getElementById("connectionStatus");
+
+
+// COMMENT
 const usernameInput =
   document.getElementById("username");
 
 const contentInput =
   document.getElementById("content");
+
+const counter =
+  document.getElementById("counter");
 
 const sendButton =
   document.getElementById("sendButton");
@@ -30,70 +42,86 @@ const sendButton =
 const commentsContainer =
   document.getElementById("comments");
 
-const errorBox =
-  document.getElementById("errorBox");
 
-const counter =
-  document.getElementById("counter");
+// MESSAGE
+const messageSender =
+  document.getElementById("messageSender");
+
+const messageRecipient =
+  document.getElementById("messageRecipient");
+
+const recipientCode =
+  document.getElementById("recipientCode");
+
+const messageContent =
+  document.getElementById("messageContent");
+
+const messageCounter =
+  document.getElementById("messageCounter");
+
+const sendMessageButton =
+  document.getElementById("sendMessageButton");
 
 
-// ==========================================
-// CHECK SUPABASE
-// ==========================================
+// SEARCH
+const searchCode =
+  document.getElementById("searchCode");
 
-if (!window.supabase) {
+const searchButton =
+  document.getElementById("searchButton");
 
-  showError(
-    "Supabase gagal dimuat. Periksa koneksi internet."
-  );
+const messageResults =
+  document.getElementById("messageResults");
 
+
+// ======================================================
+// NOTICE
+// ======================================================
+
+let noticeTimer;
+
+function showNotice(
+  message,
+  success = false
+) {
+
+  clearTimeout(noticeTimer);
+
+  notice.textContent = message;
+
+  notice.className =
+    "notice show" +
+    (success ? " success" : "");
+
+  noticeTimer =
+    setTimeout(() => {
+
+      notice.className =
+        "notice";
+
+    }, 5000);
 }
 
 
-// ==========================================
-// COUNTER
-// ==========================================
-
-contentInput.addEventListener("input", () => {
-
-  counter.textContent =
-    `${contentInput.value.length} / 500`;
-
-});
-
-
-// ==========================================
-// ERROR
-// ==========================================
-
-function showError(message) {
-
-  errorBox.textContent = message;
-
-  errorBox.style.display = "block";
-
-}
-
-
-// ==========================================
+// ======================================================
 // ESCAPE HTML
-// ==========================================
+// ======================================================
 
 function escapeHTML(text) {
 
   const div =
     document.createElement("div");
 
-  div.textContent = text;
+  div.textContent =
+    String(text ?? "");
 
   return div.innerHTML;
-
 }
 
 
-// ==========================================
+// ======================================================
 // DATE
-// ==========================================
+// ======================================================
 
 function formatDate(date) {
 
@@ -108,59 +136,121 @@ function formatDate(date) {
 }
 
 
-// ==========================================
-// LOAD COMMENTS
-// ==========================================
+// ======================================================
+// HASH KODE PENERIMA
+// HARUS SAMA DENGAN PostgreSQL SHA-256
+// ======================================================
+
+async function hashRecipientCode(code) {
+
+  const normalized =
+    code.trim();
+
+  const encoder =
+    new TextEncoder();
+
+  const data =
+    encoder.encode(normalized);
+
+  const hashBuffer =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+  const hashArray =
+    Array.from(
+      new Uint8Array(hashBuffer)
+    );
+
+  return hashArray
+    .map(
+      byte =>
+        byte
+          .toString(16)
+          .padStart(2, "0")
+    )
+    .join("");
+}
+
+
+// ======================================================
+// COUNTERS
+// ======================================================
+
+contentInput.addEventListener(
+  "input",
+  () => {
+
+    counter.textContent =
+      `${contentInput.value.length} / 500`;
+
+  }
+);
+
+
+messageContent.addEventListener(
+  "input",
+  () => {
+
+    messageCounter.textContent =
+      `${messageContent.value.length} / 500`;
+
+  }
+);
+
+
+// ======================================================
+// COMMENTS
+// ======================================================
 
 async function loadComments() {
-
-  commentsContainer.innerHTML = `
-    <div class="loading">
-      Memuat komentar...
-    </div>
-  `;
-
 
   const {
     data,
     error
-  } = await db
+  } = await supabaseClient
     .from("comments")
     .select("*")
     .order("created_at", {
-      ascending: true
+      ascending: false
     });
 
 
   if (error) {
 
-    console.error("LOAD ERROR:", error);
+    console.error(
+      "LOAD COMMENTS:",
+      error
+    );
 
     commentsContainer.innerHTML = `
       <div class="empty">
         Gagal memuat komentar.
         <br>
-        <small>${escapeHTML(error.message)}</small>
+        <small>
+          ${escapeHTML(error.message)}
+        </small>
       </div>
     `;
 
     return;
-
   }
 
 
-  renderComments(data);
+  renderComments(data || []);
 
 }
 
 
-// ==========================================
-// RENDER
-// ==========================================
+// ======================================================
+// RENDER COMMENTS
+// ======================================================
 
 function renderComments(data) {
 
   commentsContainer.innerHTML = "";
+
 
   const mainComments =
     data.filter(
@@ -169,7 +259,9 @@ function renderComments(data) {
     );
 
 
-  if (mainComments.length === 0) {
+  if (
+    mainComments.length === 0
+  ) {
 
     commentsContainer.innerHTML = `
       <div class="empty">
@@ -178,27 +270,28 @@ function renderComments(data) {
     `;
 
     return;
-
   }
 
 
-  mainComments.forEach(comment => {
+  mainComments.forEach(
+    comment => {
 
-    commentsContainer.appendChild(
-      createComment(
-        comment,
-        data
-      )
-    );
+      commentsContainer.appendChild(
+        createComment(
+          comment,
+          data
+        )
+      );
 
-  });
+    }
+  );
 
 }
 
 
-// ==========================================
+// ======================================================
 // CREATE COMMENT
-// ==========================================
+// ======================================================
 
 function createComment(
   comment,
@@ -208,14 +301,21 @@ function createComment(
   const wrapper =
     document.createElement("article");
 
-  wrapper.className = "comment";
+  wrapper.className =
+    "comment";
 
 
   const replies =
-    allComments.filter(
-      item =>
-        item.parent_id === comment.id
-    );
+    allComments
+      .filter(
+        item =>
+          item.parent_id === comment.id
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.created_at) -
+          new Date(a.created_at)
+      );
 
 
   wrapper.innerHTML = `
@@ -256,6 +356,7 @@ function createComment(
         id="reply-name-${comment.id}"
         maxlength="30"
         placeholder="Nama / username"
+        autocomplete="off"
       >
 
       <textarea
@@ -279,53 +380,165 @@ function createComment(
 
 
   const repliesContainer =
-    wrapper.querySelector(".replies");
-
-
-  replies.forEach(reply => {
-
-    const replyElement =
-      document.createElement("div");
-
-    replyElement.className = "reply";
-
-
-    replyElement.innerHTML = `
-
-      <div class="comment-header">
-
-        <span class="username">
-          ${escapeHTML(reply.username)}
-        </span>
-
-        <span class="date">
-          ${formatDate(reply.created_at)}
-        </span>
-
-      </div>
-
-      <div class="comment-content">
-        ${escapeHTML(reply.content)}
-      </div>
-
-    `;
-
-
-    repliesContainer.appendChild(
-      replyElement
+    wrapper.querySelector(
+      ".replies"
     );
 
-  });
+
+  replies.forEach(
+    reply => {
+
+      const replyElement =
+        document.createElement(
+          "div"
+        );
+
+      replyElement.className =
+        "reply";
+
+
+      replyElement.innerHTML = `
+
+        <div class="comment-header">
+
+          <span class="username">
+            ${escapeHTML(reply.username)}
+          </span>
+
+          <span class="date">
+            ${formatDate(reply.created_at)}
+          </span>
+
+        </div>
+
+        <div class="comment-content">
+          ${escapeHTML(reply.content)}
+        </div>
+
+      `;
+
+
+      repliesContainer.appendChild(
+        replyElement
+      );
+
+    }
+  );
 
 
   return wrapper;
+}
+
+
+// ======================================================
+// SEND COMMENT
+// ======================================================
+
+async function sendComment() {
+
+  const username =
+    usernameInput.value.trim();
+
+  const content =
+    contentInput.value.trim();
+
+
+  if (!username) {
+
+    showNotice(
+      "Masukkan nama / username."
+    );
+
+    return;
+  }
+
+
+  if (!content) {
+
+    showNotice(
+      "Komentar tidak boleh kosong."
+    );
+
+    return;
+  }
+
+
+  sendButton.disabled = true;
+
+  sendButton.textContent =
+    "Mengirim...";
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from("comments")
+    .insert({
+
+      username,
+      content,
+      parent_id: null
+
+    });
+
+
+  if (error) {
+
+    console.error(
+      "SEND COMMENT:",
+      error
+    );
+
+    showNotice(
+      "Gagal mengirim: " +
+      error.message
+    );
+
+    sendButton.disabled =
+      false;
+
+    sendButton.textContent =
+      "Kirim Komentar";
+
+    return;
+  }
+
+
+  contentInput.value = "";
+
+  counter.textContent =
+    "0 / 500";
+
+
+  sendButton.textContent =
+    "Terkirim ✓";
+
+
+  showNotice(
+    "Komentar berhasil dikirim!",
+    true
+  );
+
+
+  await loadComments();
+
+
+  setTimeout(() => {
+
+    sendButton.textContent =
+      "Kirim Komentar";
+
+    sendButton.disabled =
+      false;
+
+  }, 1000);
 
 }
 
 
-// ==========================================
-// TOGGLE REPLY
-// ==========================================
+// ======================================================
+// REPLY
+// ======================================================
 
 function toggleReply(id) {
 
@@ -338,172 +551,12 @@ function toggleReply(id) {
   if (!box) return;
 
 
-  box.classList.toggle("active");
+  box.classList.toggle(
+    "active"
+  );
 
 }
 
-
-// ==========================================
-// SEND COMMENT
-// ==========================================
-
-async function sendComment() {
-
-  console.log("SEND COMMENT DIPANGGIL");
-
-
-  const username =
-    usernameInput.value.trim();
-
-  const content =
-    contentInput.value.trim();
-
-
-  if (!username) {
-
-    showError(
-      "❌ Masukkan nama / username."
-    );
-
-    usernameInput.focus();
-
-    return;
-
-  }
-
-
-  if (!content) {
-
-    showError(
-      "❌ Komentar tidak boleh kosong."
-    );
-
-    contentInput.focus();
-
-    return;
-
-  }
-
-
-  if (username.length > 30) {
-
-    showError(
-      "❌ Username maksimal 30 karakter."
-    );
-
-    return;
-
-  }
-
-
-  if (content.length > 500) {
-
-    showError(
-      "❌ Komentar maksimal 500 karakter."
-    );
-
-    return;
-
-  }
-
-
-  sendButton.disabled = true;
-
-  sendButton.textContent =
-    "Mengirim...";
-
-
-  errorBox.style.display = "none";
-
-
-  try {
-
-    const {
-      data,
-      error
-    } = await db
-      .from("comments")
-      .insert({
-
-        username: username,
-
-        content: content,
-
-        parent_id: null
-
-      })
-      .select();
-
-
-    if (error) {
-
-      console.error(
-        "SUPABASE INSERT ERROR:",
-        error
-      );
-
-      showError(
-        "❌ Gagal: " +
-        error.message
-      );
-
-      return;
-
-    }
-
-
-    console.log(
-      "COMMENT BERHASIL:",
-      data
-    );
-
-
-    contentInput.value = "";
-
-    counter.textContent =
-      "0 / 500";
-
-
-    sendButton.textContent =
-      "Terkirim ✓";
-
-
-    await loadComments();
-
-
-    setTimeout(() => {
-
-      sendButton.textContent =
-        "Kirim Komentar";
-
-    }, 1500);
-
-
-  } catch (error) {
-
-    console.error(
-      "JAVASCRIPT ERROR:",
-      error
-    );
-
-
-    showError(
-      "❌ Error: " +
-      error.message
-    );
-
-  } finally {
-
-    sendButton.disabled = false;
-
-  }
-
-}
-
-
-// ==========================================
-// SEND REPLY
-// ==========================================
 
 async function sendReply(parentId) {
 
@@ -512,7 +565,7 @@ async function sendReply(parentId) {
       `reply-name-${parentId}`
     );
 
-  const replyInput =
+  const contentInputReply =
     document.getElementById(
       `reply-content-${parentId}`
     );
@@ -522,41 +575,37 @@ async function sendReply(parentId) {
     nameInput.value.trim();
 
   const content =
-    replyInput.value.trim();
+    contentInputReply.value.trim();
 
 
   if (!username) {
 
-    showError(
-      "❌ Masukkan nama / username."
+    showNotice(
+      "Masukkan nama / username."
     );
 
     return;
-
   }
 
 
   if (!content) {
 
-    showError(
-      "❌ Balasan tidak boleh kosong."
+    showNotice(
+      "Balasan tidak boleh kosong."
     );
 
     return;
-
   }
 
 
   const {
     error
-  } = await db
+  } = await supabaseClient
     .from("comments")
     .insert({
 
-      username: username,
-
-      content: content,
-
+      username,
+      content,
       parent_id: parentId
 
     });
@@ -565,18 +614,23 @@ async function sendReply(parentId) {
   if (error) {
 
     console.error(
-      "REPLY ERROR:",
+      "SEND REPLY:",
       error
     );
 
-    showError(
-      "❌ Gagal: " +
+    showNotice(
+      "Gagal mengirim balasan: " +
       error.message
     );
 
     return;
-
   }
+
+
+  showNotice(
+    "Balasan berhasil dikirim!",
+    true
+  );
 
 
   await loadComments();
@@ -584,11 +638,380 @@ async function sendReply(parentId) {
 }
 
 
-// ==========================================
-// REALTIME
-// ==========================================
+// ======================================================
+// SEND MESSAGE
+// ======================================================
 
-db
+async function sendMessage() {
+
+  const sender =
+    messageSender.value.trim();
+
+  const recipient =
+    messageRecipient.value.trim();
+
+  const code =
+    recipientCode.value.trim();
+
+  const content =
+    messageContent.value.trim();
+
+
+  if (!sender) {
+
+    showNotice(
+      "Masukkan nama pengirim."
+    );
+
+    return;
+  }
+
+
+  if (!recipient) {
+
+    showNotice(
+      "Masukkan nama penerima."
+    );
+
+    return;
+  }
+
+
+  if (!code) {
+
+    showNotice(
+      "Masukkan kode penerima."
+    );
+
+    return;
+  }
+
+
+  if (code.length < 6) {
+
+    showNotice(
+      "Kode penerima minimal 6 karakter."
+    );
+
+    return;
+  }
+
+
+  if (!content) {
+
+    showNotice(
+      "Pesan tidak boleh kosong."
+    );
+
+    return;
+  }
+
+
+  sendMessageButton.disabled =
+    true;
+
+  sendMessageButton.textContent =
+    "Mengirim...";
+
+
+  try {
+
+    const codeHash =
+      await hashRecipientCode(
+        code
+      );
+
+
+    const {
+      error
+    } = await supabaseClient
+      .from("messages")
+      .insert({
+
+        sender: sender,
+
+        recipient: recipient,
+
+        recipient_code_hash:
+          codeHash,
+
+        content: content
+
+      });
+
+
+    if (error) {
+
+      console.error(
+        "SEND MESSAGE:",
+        error
+      );
+
+      showNotice(
+        "Gagal mengirim pesan: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    messageContent.value = "";
+
+    messageCounter.textContent =
+      "0 / 500";
+
+
+    sendMessageButton.textContent =
+      "Terkirim ✓";
+
+
+    showNotice(
+      "Pesan berhasil dikirim!",
+      true
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "MESSAGE ERROR:",
+      error
+    );
+
+    showNotice(
+      "Gagal memproses kode penerima."
+    );
+
+  } finally {
+
+    setTimeout(() => {
+
+      sendMessageButton.disabled =
+        false;
+
+      sendMessageButton.textContent =
+        "Kirim Pesan";
+
+    }, 1000);
+
+  }
+
+}
+
+
+// ======================================================
+// SEARCH MESSAGES
+// ======================================================
+
+async function searchMessages() {
+
+  const code =
+    searchCode.value.trim();
+
+
+  if (!code) {
+
+    showNotice(
+      "Masukkan kode penerima."
+    );
+
+    return;
+  }
+
+
+  if (code.length < 6) {
+
+    showNotice(
+      "Kode penerima minimal 6 karakter."
+    );
+
+    return;
+  }
+
+
+  searchButton.disabled =
+    true;
+
+  searchButton.textContent =
+    "Mencari...";
+
+
+  messageResults.innerHTML = `
+    <div class="loading">
+      Mencari pesan...
+    </div>
+  `;
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .rpc(
+        "get_my_messages",
+        {
+          p_recipient_code:
+            code
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "SEARCH MESSAGE:",
+        error
+      );
+
+      messageResults.innerHTML = `
+        <div class="empty">
+          Gagal mencari pesan.
+        </div>
+      `;
+
+      showNotice(
+        "Gagal mencari pesan: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    renderMessages(
+      data || []
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    messageResults.innerHTML = `
+      <div class="empty">
+        Terjadi kesalahan.
+      </div>
+    `;
+
+  } finally {
+
+    searchButton.disabled =
+      false;
+
+    searchButton.textContent =
+      "Cari";
+
+  }
+
+}
+
+
+// ======================================================
+// RENDER MESSAGES
+// ======================================================
+
+function renderMessages(
+  messages
+) {
+
+  messageResults.innerHTML = "";
+
+
+  if (
+    messages.length === 0
+  ) {
+
+    messageResults.innerHTML = `
+      <div class="empty">
+        Tidak ada pesan untuk kode tersebut.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  messages.forEach(
+    message => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "message-item";
+
+
+      item.innerHTML = `
+
+        <div class="message-top">
+
+          <div>
+
+            <div class="message-from">
+              ${escapeHTML(message.sender)}
+            </div>
+
+            <div class="message-to">
+              Untuk: ${escapeHTML(message.recipient)}
+            </div>
+
+          </div>
+
+          <span class="date">
+            ${formatDate(message.created_at)}
+          </span>
+
+        </div>
+
+        <div class="message-text">
+          ${escapeHTML(message.content)}
+        </div>
+
+      `;
+
+
+      messageResults.appendChild(
+        item
+      );
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// BUTTON EVENTS
+// ======================================================
+
+sendButton.addEventListener(
+  "click",
+  sendComment
+);
+
+sendMessageButton.addEventListener(
+  "click",
+  sendMessage
+);
+
+searchButton.addEventListener(
+  "click",
+  searchMessages
+);
+
+
+// ======================================================
+// REALTIME COMMENTS
+// ======================================================
+
+supabaseClient
   .channel("public-comments")
   .on(
     "postgres_changes",
@@ -603,21 +1026,35 @@ db
 
     }
   )
-  .subscribe();
+  .subscribe(
+    status => {
+
+      if (
+        status === "SUBSCRIBED"
+      ) {
+
+        connectionStatus.textContent =
+          "● Online";
+
+        connectionStatus.style.color =
+          "#4ade80";
+
+      } else {
+
+        connectionStatus.textContent =
+          "● Offline";
+
+        connectionStatus.style.color =
+          "#f87171";
+
+      }
+
+    }
+  );
 
 
-// ==========================================
-// BUTTON EVENT
-// ==========================================
-
-sendButton.addEventListener(
-  "click",
-  sendComment
-);
-
-
-// ==========================================
+// ======================================================
 // START
-// ==========================================
+// ======================================================
 
 loadComments();
