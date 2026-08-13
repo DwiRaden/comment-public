@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Komentar Publik</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <header class="header">
+      <h1>💬 Komentar Publik</h1>
+      <p>Bagikan pendapat dan balas komentar pengguna lain.</p>
+    </header>
+
+    <div id="errorBox" class="error"></div>
+
+    <section class="comment-form">
+
+      <input
+        id="username"
+        type="text"
+        maxlength="30"
+        placeholder="Nama / username"
+        autocomplete="off"
+      >
+
+      <textarea
+        id="content"
+        maxlength="500"
+        placeholder="Tulis komentar..."
+      ></textarea>
+
+      <div class="form-bottom">
+        <span id="counter">0 / 500</span>
+
+        <button id="sendButton">
+          Kirim Komentar
+        </button>
+      </div>
+
+    </section>
+
+    <section>
+
+      <h2 class="section-title">
+        Komentar
+      </h2>
+
+      <div id="comments">
+        <div class="loading">
+          Memuat komentar...
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+        </html>
