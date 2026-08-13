@@ -5,66 +5,149 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
   background: #f3f4f6;
   color: #111827;
+
+  line-height: 1.5;
 }
+
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+
+/* =====================================
+   CONTAINER
+===================================== */
 
 .container {
   width: 100%;
   max-width: 760px;
+
   margin: auto;
-  padding: 20px;
+
+  padding: 15px;
 }
 
-/* HEADER */
+
+/* =====================================
+   HEADER
+===================================== */
 
 .header {
   background: #111827;
   color: white;
-  padding: 25px;
-  border-radius: 16px;
-  margin-bottom: 18px;
+
+  padding: 22px;
+
+  border-radius: 18px;
+
+  margin-bottom: 15px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 15px;
 }
 
 .header h1 {
-  font-size: 25px;
-  margin-bottom: 7px;
+  font-size: 24px;
 }
 
 .header p {
-  color: #d1d5db;
-  font-size: 14px;
+  color: #cbd5e1;
+  font-size: 13px;
+  margin-top: 3px;
 }
 
-/* FORM */
 
-.comment-form {
+/* =====================================
+   STATUS
+===================================== */
+
+.status {
+  white-space: nowrap;
+
+  font-size: 11px;
+
+  color: #fbbf24;
+}
+
+
+/* =====================================
+   CARD
+===================================== */
+
+.card {
   background: white;
-  padding: 18px;
+
   border-radius: 16px;
-  margin-bottom: 25px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, .05);
+
+  padding: 18px;
+
+  margin-bottom: 15px;
+
+  box-shadow:
+    0 3px 15px rgba(0, 0, 0, .05);
 }
+
+.card h2 {
+  font-size: 18px;
+
+  margin-bottom: 4px;
+}
+
+.description {
+  color: #6b7280;
+
+  font-size: 13px;
+
+  margin-bottom: 14px;
+}
+
+
+/* =====================================
+   INPUT
+===================================== */
 
 input,
 textarea {
   width: 100%;
+
   border: 1px solid #d1d5db;
+
+  background: white;
+
   border-radius: 10px;
+
   padding: 12px;
-  font-family: inherit;
-  font-size: 14px;
+
   outline: none;
+
+  font-size: 14px;
+
+  color: #111827;
 }
 
 input {
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 textarea {
   min-height: 100px;
+
   resize: vertical;
+
+  margin-top: 2px;
 }
 
 input:focus,
@@ -72,80 +155,190 @@ textarea:focus {
   border-color: #2563eb;
 }
 
-.form-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
 
-#counter {
-  color: #9ca3af;
-  font-size: 12px;
-}
+/* =====================================
+   BUTTON
+===================================== */
 
 button {
   border: none;
-  cursor: pointer;
-  border-radius: 9px;
+
+  border-radius: 10px;
+
+  padding: 11px 16px;
+
+  font-size: 13px;
+
   font-weight: bold;
-}
 
-#sendButton {
+  cursor: pointer;
+
   background: #2563eb;
+
   color: white;
-  padding: 11px 18px;
+
+  transition: .15s;
 }
 
-#sendButton:hover {
-  background: #1d4ed8;
+button:hover {
+  opacity: .9;
 }
 
-#sendButton:disabled {
-  opacity: .6;
+button:disabled {
+  opacity: .55;
+
   cursor: not-allowed;
 }
 
-/* TITLE */
 
-.section-title {
-  font-size: 20px;
-  margin-bottom: 12px;
+/* =====================================
+   BOTTOM ROW
+===================================== */
+
+.bottom-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 9px;
 }
 
-/* COMMENT */
+#counter,
+#messageCounter {
+  font-size: 11px;
+
+  color: #9ca3af;
+}
+
+
+/* =====================================
+   SEARCH
+===================================== */
+
+.search-row {
+  display: flex;
+
+  gap: 8px;
+}
+
+.search-row input {
+  margin: 0;
+}
+
+.search-row button {
+  flex-shrink: 0;
+}
+
+
+/* =====================================
+   NOTICE
+===================================== */
+
+.notice {
+  display: none;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  margin-bottom: 15px;
+
+  font-size: 13px;
+
+  background: #fee2e2;
+
+  color: #991b1b;
+}
+
+.notice.success {
+  background: #dcfce7;
+
+  color: #166534;
+}
+
+.notice.show {
+  display: block;
+}
+
+
+/* =====================================
+   SECTION HEADER
+===================================== */
+
+.section-header {
+  margin: 25px 0 10px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+}
+
+.section-header p {
+  font-size: 12px;
+
+  color: #6b7280;
+}
+
+
+/* =====================================
+   COMMENT
+===================================== */
 
 .comment {
   background: white;
+
+  border-radius: 15px;
+
   padding: 16px;
-  border-radius: 14px;
-  margin-bottom: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, .04);
+
+  margin-bottom: 11px;
+
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, .04);
 }
 
 .comment-header {
   display: flex;
+
   justify-content: space-between;
+
+  align-items: center;
+
   gap: 10px;
-  margin-bottom: 8px;
+
+  margin-bottom: 7px;
 }
 
 .username {
   font-weight: bold;
+
+  color: #111827;
 }
 
 .date {
+  font-size: 10px;
+
   color: #9ca3af;
-  font-size: 11px;
 }
 
 .comment-content {
-  line-height: 1.5;
   white-space: pre-wrap;
+
   word-break: break-word;
+
+  font-size: 14px;
+
+  color: #374151;
 }
 
-/* ACTION */
+
+/* =====================================
+   REPLY
+===================================== */
 
 .actions {
   margin-top: 10px;
@@ -153,30 +346,26 @@ button {
 
 .reply-button {
   background: #eef2ff;
+
   color: #3730a3;
-  padding: 8px 12px;
-  font-size: 12px;
-}
 
-.reply-button:hover {
-  background: #e0e7ff;
-}
+  padding: 8px 11px;
 
-/* REPLY FORM */
+  font-size: 11px;
+}
 
 .reply-box {
   display: none;
-  margin-top: 12px;
-  padding-left: 14px;
+
+  margin-top: 10px;
+
+  padding-left: 12px;
+
   border-left: 3px solid #e5e7eb;
 }
 
 .reply-box.active {
   display: block;
-}
-
-.reply-box input {
-  margin-bottom: 8px;
 }
 
 .reply-box textarea {
@@ -185,71 +374,140 @@ button {
 
 .reply-submit {
   background: #111827;
-  color: white;
+
   padding: 9px 13px;
-  font-size: 12px;
+
+  font-size: 11px;
 }
 
-/* REPLIES */
+
+/* =====================================
+   REPLIES
+===================================== */
 
 .replies {
-  margin-top: 13px;
-  margin-left: 20px;
-  border-left: 2px solid #e5e7eb;
+  margin-top: 12px;
+
+  margin-left: 18px;
+
   padding-left: 12px;
+
+  border-left: 2px solid #e5e7eb;
 }
 
 .reply {
   background: #f9fafb;
-  padding: 12px;
+
+  padding: 11px;
+
   border-radius: 10px;
+
   margin-bottom: 8px;
 }
 
-/* EMPTY / LOADING */
 
-.empty,
-.loading {
-  text-align: center;
-  color: #6b7280;
-  padding: 30px;
+/* =====================================
+   MESSAGE
+===================================== */
+
+.message-item {
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 13px;
+
+  margin-top: 10px;
 }
 
-/* ERROR */
+.message-top {
+  display: flex;
 
-.error {
-  display: none;
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 7px;
+}
+
+.message-from {
+  font-weight: bold;
+}
+
+.message-to {
+  color: #6b7280;
+
+  font-size: 11px;
+}
+
+.message-text {
+  white-space: pre-wrap;
+
+  word-break: break-word;
+
   font-size: 14px;
 }
 
-/* MOBILE */
 
-@media (max-width: 500px) {
+/* =====================================
+   LOADING / EMPTY
+===================================== */
+
+.loading,
+.empty {
+  text-align: center;
+
+  color: #6b7280;
+
+  padding: 25px;
+
+  font-size: 13px;
+}
+
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media (max-width: 550px) {
 
   .container {
-    padding: 12px;
+    padding: 10px;
   }
 
   .header {
-    padding: 20px;
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    padding: 19px;
   }
 
   .header h1 {
-    font-size: 22px;
+    font-size: 21px;
   }
 
-  .comment-header {
+  .search-row {
     flex-direction: column;
-    gap: 3px;
+  }
+
+  .search-row button {
+    width: 100%;
+  }
+
+  .comment-header,
+  .message-top {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 2px;
   }
 
   .replies {
-    margin-left: 10px;
+    margin-left: 5px;
   }
 
-  }
+}
