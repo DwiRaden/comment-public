@@ -8,11 +8,10 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_U2at4VScoGw7vFR8MkxiQw_y9q-kGmf";
 
-const db =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
 // ============================================
@@ -20,7 +19,6 @@ const db =
 // ============================================
 
 let selectedGeneration = "";
-
 let currentSearchName = "";
 
 
@@ -62,10 +60,9 @@ const results =
 
 let noticeTimeout;
 
-function showNotice(
-  text,
-  success = false
-) {
+function showNotice(text, success = false) {
+
+  if (!notice) return;
 
   clearTimeout(noticeTimeout);
 
@@ -75,14 +72,11 @@ function showNotice(
     "notice show" +
     (success ? " success" : "");
 
-  noticeTimeout =
-    setTimeout(() => {
+  noticeTimeout = setTimeout(() => {
 
-      notice.className =
-        "notice";
+    notice.className = "notice";
 
-    }, 4500);
-
+  }, 4500);
 }
 
 
@@ -99,7 +93,6 @@ function escapeHTML(value) {
     String(value ?? "");
 
   return div.innerHTML;
-
 }
 
 
@@ -117,22 +110,17 @@ function showPage(pageId) {
 
     });
 
-
   const page =
     document.getElementById(pageId);
 
-
   if (!page) return;
 
-
   page.classList.add("active");
-
 
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
-
 }
 
 
@@ -140,16 +128,11 @@ function showPage(pageId) {
 // QUICK GENERATION
 // ============================================
 
-function quickGeneration(
-  generation
-) {
+function quickGeneration(generation) {
 
   showPage("sendPage");
 
-  selectGeneration(
-    generation
-  );
-
+  selectGeneration(generation);
 }
 
 
@@ -157,13 +140,10 @@ function quickGeneration(
 // SELECT GENERATION
 // ============================================
 
-function selectGeneration(
-  generation
-) {
+function selectGeneration(generation) {
 
   selectedGeneration =
     generation;
-
 
   document
     .querySelectorAll(
@@ -178,7 +158,6 @@ function selectGeneration(
       );
 
     });
-
 }
 
 
@@ -188,14 +167,15 @@ function selectGeneration(
 
 function setAnonymous() {
 
-  sender.value =
-    "Anonymous";
+  if (sender) {
+    sender.value = "Anonymous";
+  }
 
 }
 
 
 // ============================================
-// COUNTER
+// MESSAGE COUNTER
 // ============================================
 
 if (message) {
@@ -204,8 +184,12 @@ if (message) {
     "input",
     () => {
 
-      messageCounter.textContent =
-        `${message.value.length} / 500`;
+      if (messageCounter) {
+
+        messageCounter.textContent =
+          `${message.value.length} / 500`;
+
+      }
 
     }
   );
@@ -230,6 +214,7 @@ async function sendMessage() {
     message.value.trim();
 
 
+  // Validasi angkatan
   if (!selectedGeneration) {
 
     showNotice(
@@ -240,6 +225,7 @@ async function sendMessage() {
   }
 
 
+  // Validasi penerima
   if (!to) {
 
     showNotice(
@@ -252,6 +238,7 @@ async function sendMessage() {
   }
 
 
+  // Validasi pesan
   if (!content) {
 
     showNotice(
@@ -264,93 +251,108 @@ async function sendMessage() {
   }
 
 
-  sendBtn.disabled =
-    true;
-
-  sendBtn.textContent =
-    "Mengirim...";
-
-
-  const { error } =
-    await db
-      .from("messages")
-      .insert({
-
-        sender:
-          from,
-
-        recipient:
-          to,
-
-        generation:
-          selectedGeneration,
-
-        content:
-          content,
-
-        parent_id:
-          null
-
-      });
-
-
-  if (error) {
-
-    console.error(
-      "SEND ERROR:",
-      error
-    );
+  if (content.length > 500) {
 
     showNotice(
-      "Gagal mengirim pesan: " +
-      error.message
+      "Pesan maksimal 500 karakter."
     );
-
-    sendBtn.disabled =
-      false;
-
-    sendBtn.textContent =
-      "Kirim 💌";
 
     return;
   }
 
 
-  recipient.value =
-    "";
-
-  message.value =
-    "";
-
-  messageCounter.textContent =
-    "0 / 500";
-
-
-  showNotice(
-    "Pesan berhasil dikirim! 💌",
-    true
-  );
-
+  sendBtn.disabled = true;
 
   sendBtn.textContent =
-    "Terkirim ✓";
+    "Mengirim...";
 
 
-  setTimeout(() => {
+  try {
 
-    sendBtn.disabled =
-      false;
+    const { error } =
+      await db
+        .from("messages")
+        .insert({
+
+          sender: from,
+
+          recipient: to,
+
+          generation:
+            selectedGeneration,
+
+          content: content,
+
+          parent_id: null
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "SEND MESSAGE ERROR:",
+        error
+      );
+
+      showNotice(
+        "Gagal mengirim pesan: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    // Bersihkan form
+    recipient.value = "";
+
+    message.value = "";
+
+    if (messageCounter) {
+
+      messageCounter.textContent =
+        "0 / 500";
+
+    }
+
+
+    showNotice(
+      "Pesan berhasil dikirim! 💌",
+      true
+    );
+
 
     sendBtn.textContent =
-      "Kirim 💌";
+      "Terkirim ✓";
 
-  }, 1200);
+
+  } catch (err) {
+
+    console.error(err);
+
+    showNotice(
+      "Terjadi kesalahan saat mengirim pesan."
+    );
+
+  } finally {
+
+    setTimeout(() => {
+
+      sendBtn.disabled = false;
+
+      sendBtn.textContent =
+        "Kirim 💌";
+
+    }, 1200);
+
+  }
 
 }
 
 
 // ============================================
-// SEARCH
+// SEARCH PESAN
 // ============================================
 
 async function searchMessages() {
@@ -373,8 +375,7 @@ async function searchMessages() {
     name;
 
 
-  searchBtn.disabled =
-    true;
+  searchBtn.disabled = true;
 
   searchBtn.textContent =
     "Mencari...";
@@ -387,79 +388,78 @@ async function searchMessages() {
   `;
 
 
-  const { data, error } =
-    await db
-      .from("messages")
-      .select(`
-        id,
-        sender,
-        recipient,
-        generation,
-        content,
-        created_at,
-        parent_id
-      `)
-      .ilike(
-        "recipient",
-        name
-      )
-      .is(
-        "parent_id",
-        null
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
+  try {
+
+    /*
+      PENTING:
+
+      Jangan SELECT langsung ke messages.
+
+      Kita menggunakan RPC yang sudah dibuat
+      di SQL Supabase.
+    */
+
+    const {
+      data,
+      error
+    } = await db.rpc(
+      "search_messages",
+      {
+        p_recipient: name
+      }
+    );
+
+
+    if (error) {
+
+      console.error(
+        "SEARCH ERROR:",
+        error
       );
 
+      results.innerHTML = `
+        <div class="empty">
+          Gagal mencari pesan.
+        </div>
+      `;
 
-  if (error) {
+      showNotice(
+        "Gagal mencari pesan: " +
+        error.message
+      );
 
-    console.error(
-      "SEARCH ERROR:",
-      error
+      return;
+    }
+
+
+    await renderMessages(
+      data || [],
+      name
     );
 
-    results.innerHTML = `
-      <div class="empty">
-        Gagal mencari pesan.
-      </div>
-    `;
+
+  } catch (err) {
+
+    console.error(err);
 
     showNotice(
-      "Gagal mencari pesan: " +
-      error.message
+      "Terjadi kesalahan saat mencari pesan."
     );
 
-    searchBtn.disabled =
-      false;
+  } finally {
+
+    searchBtn.disabled = false;
 
     searchBtn.textContent =
       "Cari";
 
-    return;
   }
-
-
-  await renderMessages(
-    data || [],
-    name
-  );
-
-
-  searchBtn.disabled =
-    false;
-
-  searchBtn.textContent =
-    "Cari";
 
 }
 
 
 // ============================================
-// RENDER MESSAGES
+// RENDER PESAN
 // ============================================
 
 async function renderMessages(
@@ -467,8 +467,7 @@ async function renderMessages(
   name
 ) {
 
-  results.innerHTML =
-    "";
+  results.innerHTML = "";
 
 
   if (!messages.length) {
@@ -495,23 +494,25 @@ async function renderMessages(
   title.textContent =
     `${messages.length} pesan untuk ${name}`;
 
-  results.appendChild(
-    title
-  );
+  results.appendChild(title);
 
+
+  /*
+    Data dari RPC sudah diurutkan:
+    created_at DESC
+
+    Jadi pesan terbaru
+    otomatis paling atas.
+  */
 
   for (
     const item of messages
   ) {
 
     const card =
-      await createMessageCard(
-        item
-      );
+      createMessageCard(item);
 
-    results.appendChild(
-      card
-    );
+    results.appendChild(card);
 
   }
 
@@ -519,12 +520,10 @@ async function renderMessages(
 
 
 // ============================================
-// CREATE MESSAGE CARD
+// CREATE PESAN CARD
 // ============================================
 
-async function createMessageCard(
-  item
-) {
+function createMessageCard(item) {
 
   const card =
     document.createElement("article");
@@ -551,9 +550,7 @@ async function createMessageCard(
       </div>
 
       <div class="time">
-        ${formatDate(
-          item.created_at
-        )}
+        ${formatDate(item.created_at)}
       </div>
 
     </div>
@@ -565,9 +562,7 @@ async function createMessageCard(
 
 
     <span class="generation-tag">
-      ${generationName(
-        item.generation
-      )}
+      ${generationName(item.generation)}
     </span>
 
 
@@ -575,9 +570,7 @@ async function createMessageCard(
 
       <button
         class="reply-button"
-        onclick="toggleComments(
-          ${item.id}
-        )"
+        onclick="toggleComments(${item.id})"
       >
         💬 Komentar
       </button>
@@ -588,6 +581,7 @@ async function createMessageCard(
     <div
       class="comments-area"
       id="comments-${item.id}"
+      style="display:none;"
     >
 
       <div
@@ -606,6 +600,7 @@ async function createMessageCard(
           id="reply-name-${item.id}"
           maxlength="30"
           placeholder="Nama kamu (opsional)"
+          autocomplete="off"
         >
 
 
@@ -618,9 +613,7 @@ async function createMessageCard(
 
         <button
           class="reply-send"
-          onclick="sendReply(
-            ${item.id}
-          )"
+          onclick="sendReply(${item.id})"
         >
           Kirim Komentar
         </button>
@@ -632,27 +625,15 @@ async function createMessageCard(
   `;
 
 
-  const commentsArea =
-    card.querySelector(
-      ".comments-area"
-    );
-
-  commentsArea.style.display =
-    "none";
-
-
   return card;
-
 }
 
 
 // ============================================
-// TOGGLE COMMENTS
+// TOGGLE KOMENTAR
 // ============================================
 
-async function toggleComments(
-  id
-) {
+async function toggleComments(id) {
 
   const area =
     document.getElementById(
@@ -671,9 +652,7 @@ async function toggleComments(
     area.style.display =
       "block";
 
-    await loadComments(
-      id
-    );
+    await loadComments(id);
 
   } else {
 
@@ -686,7 +665,7 @@ async function toggleComments(
 
 
 // ============================================
-// LOAD COMMENTS
+// LOAD KOMENTAR
 // ============================================
 
 async function loadComments(
@@ -702,34 +681,32 @@ async function loadComments(
   if (!list) return;
 
 
-  const { data, error } =
-    await db
-      .from("messages")
-      .select(`
-        id,
-        sender,
-        recipient,
-        generation,
-        content,
-        created_at,
-        parent_id
-      `)
-      .eq(
-        "parent_id",
-        parentId
-      )
-      .order(
-        "created_at",
-        {
-          ascending: true
-        }
-      );
+  /*
+    Tidak menggunakan:
+
+    .from("messages").select()
+
+    karena SELECT langsung
+    memang diblokir RLS.
+
+    Gunakan RPC.
+  */
+
+  const {
+    data,
+    error
+  } = await db.rpc(
+    "get_message_comments",
+    {
+      p_parent_id: parentId
+    }
+  );
 
 
   if (error) {
 
     console.error(
-      "COMMENTS ERROR:",
+      "LOAD COMMENTS ERROR:",
       error
     );
 
@@ -743,8 +720,7 @@ async function loadComments(
   }
 
 
-  list.innerHTML =
-    "";
+  list.innerHTML = "";
 
 
   if (
@@ -762,26 +738,24 @@ async function loadComments(
   }
 
 
-  data.forEach(
-    comment => {
+  data.forEach(comment => {
 
-      const element =
-        createCommentElement(
-          comment
-        );
-
-      list.appendChild(
-        element
+    const element =
+      createCommentElement(
+        comment
       );
 
-    }
-  );
+    list.appendChild(
+      element
+    );
+
+  });
 
 }
 
 
 // ============================================
-// CREATE COMMENT
+// CREATE KOMENTAR KECIL
 // ============================================
 
 function createCommentElement(
@@ -800,36 +774,29 @@ function createCommentElement(
     <div class="comment-head">
 
       <strong>
-        ${escapeHTML(
-          comment.sender
-        )}
+        ${escapeHTML(comment.sender)}
       </strong>
 
       <span>
-        ${formatDate(
-          comment.created_at
-        )}
+        ${formatDate(comment.created_at)}
       </span>
 
     </div>
 
 
     <div class="comment-content">
-      ${escapeHTML(
-        comment.content
-      )}
+      ${escapeHTML(comment.content)}
     </div>
 
   `;
 
 
   return div;
-
 }
 
 
 // ============================================
-// SEND COMMENT
+// SEND REPLY / COMMENT
 // ============================================
 
 async function sendReply(
@@ -845,6 +812,9 @@ async function sendReply(
     document.getElementById(
       `reply-content-${parentId}`
     );
+
+
+  if (!contentInput) return;
 
 
   const from =
@@ -867,31 +837,40 @@ async function sendReply(
   }
 
 
+  if (content.length > 500) {
+
+    showNotice(
+      "Komentar maksimal 500 karakter."
+    );
+
+    return;
+  }
+
+
   /*
-    Ambil pesan utama.
-    Kita hanya mengambil recipient
-    dan generation agar komentar
-    tetap punya data yang valid.
+    Ambil data pesan induk
+    menggunakan RPC.
   */
 
   const {
-    data: parent,
+    data: parentData,
     error: parentError
-  } =
-    await db
-      .from("messages")
-      .select(`
-        recipient,
-        generation
-      `)
-      .eq(
-        "id",
-        parentId
-      )
-      .single();
+  } = await db.rpc(
+    "get_message_parent",
+    {
+      p_id: parentId
+    }
+  );
 
 
-  if (parentError) {
+  const parent =
+    parentData?.[0];
+
+
+  if (
+    parentError ||
+    !parent
+  ) {
 
     console.error(
       "PARENT ERROR:",
@@ -909,31 +888,32 @@ async function sendReply(
   /*
     INSERT KOMENTAR
 
-    parent_id = ID PESAN
-    YANG SEDANG DIBALAS
+    parent_id menunjuk ke
+    pesan yang sedang dikomentari.
   */
 
-  const { error } =
-    await db
-      .from("messages")
-      .insert({
+  const {
+    error
+  } = await db
+    .from("messages")
+    .insert({
 
-        sender:
-          from,
+      sender:
+        from,
 
-        recipient:
-          parent.recipient,
+      recipient:
+        parent.recipient,
 
-        generation:
-          parent.generation,
+      generation:
+        parent.generation,
 
-        content:
-          content,
+      content:
+        content,
 
-        parent_id:
-          parentId
+      parent_id:
+        parentId
 
-      });
+    });
 
 
   if (error) {
@@ -962,6 +942,11 @@ async function sendReply(
   );
 
 
+  /*
+    Langsung refresh komentar
+    tanpa refresh halaman.
+  */
+
   await loadComments(
     parentId
   );
@@ -970,7 +955,7 @@ async function sendReply(
 
 
 // ============================================
-// GENERATION NAME
+// NAMA ANGKATAN
 // ============================================
 
 function generationName(
@@ -1001,7 +986,7 @@ function generationName(
 
 
 // ============================================
-// FORMAT DATE
+// FORMAT TANGGAL
 // ============================================
 
 function formatDate(
@@ -1033,7 +1018,7 @@ function formatDate(
 
 
 // ============================================
-// REALTIME
+// REALTIME SUPABASE
 // ============================================
 
 db.channel(
@@ -1052,11 +1037,9 @@ db.channel(
       payload.new;
 
 
-    /*
-      ==============================
-      KOMENTAR BARU
-      ==============================
-    */
+    // ========================================
+    // KOMENTAR BARU
+    // ========================================
 
     if (
       newMessage.parent_id
@@ -1068,6 +1051,11 @@ db.channel(
         );
 
 
+      /*
+        Kalau komentar sedang
+        terbuka, langsung update.
+      */
+
       if (list) {
 
         await loadComments(
@@ -1076,16 +1064,13 @@ db.channel(
 
       }
 
-
       return;
     }
 
 
-    /*
-      ==============================
-      PESAN UTAMA BARU
-      ==============================
-    */
+    // ========================================
+    // PESAN UTAMA BARU
+    // ========================================
 
     if (
       currentSearchName &&
@@ -1097,6 +1082,11 @@ db.channel(
       ).toLowerCase()
     ) {
 
+      /*
+        Tidak perlu refresh browser.
+        Pencarian diambil ulang dari RPC.
+      */
+
       await searchMessages();
 
     }
@@ -1107,7 +1097,7 @@ db.channel(
 
 
 // ============================================
-// ENTER TO SEARCH
+// ENTER = SEARCH
 // ============================================
 
 if (searchName) {
@@ -1117,11 +1107,35 @@ if (searchName) {
     event => {
 
       if (
-        event.key ===
-        "Enter"
+        event.key === "Enter"
       ) {
 
         searchMessages();
+
+      }
+
+    }
+  );
+
+}
+
+
+// ============================================
+// ENTER + CTRL = SEND
+// ============================================
+
+if (message) {
+
+  message.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter" &&
+        event.ctrlKey
+      ) {
+
+        sendMessage();
 
       }
 
