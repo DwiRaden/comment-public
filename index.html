@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>SendTheMessage</title>
+
   <link rel="stylesheet" href="style.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,34 +13,55 @@
 
 <body>
 
+  <!-- HEADER -->
   <header class="topbar">
+
     <div class="brand">
-      <div class="logo">💌</div>
+
+      <div class="logo">
+        💌
+      </div>
+
       <div>
         <h1>SendTheMessage</h1>
         <p>Kirim pesan untuk seseorang.</p>
       </div>
+
     </div>
+
   </header>
 
 
   <main class="container">
 
+    <!-- NOTIFICATION -->
     <div id="notice" class="notice"></div>
 
 
-    <!-- HOME -->
-    <section id="homePage" class="page active">
+    <!-- =========================
+         HOME
+    ========================== -->
+
+    <section
+      id="homePage"
+      class="page active"
+    >
 
       <div class="hero">
-        <span class="hero-icon">💌</span>
 
-        <h2>Kirim pesan untuk seseorang</h2>
+        <span class="hero-icon">
+          💌
+        </span>
+
+        <h2>
+          Kirim pesan untuk seseorang
+        </h2>
 
         <p>
           Pilih angkatan, tulis nama penerima,
           lalu kirim pesanmu.
         </p>
+
 
         <div class="hero-buttons">
 
@@ -57,33 +80,62 @@
           </button>
 
         </div>
+
       </div>
 
+
+      <!-- ANGKATAN -->
 
       <div class="generation-grid">
 
         <button
           onclick="quickGeneration('angkatan_11')"
         >
+
           <span>🎓</span>
-          <strong>Angkatan 11</strong>
-          <small>Kirim pesan</small>
+
+          <strong>
+            Angkatan 11
+          </strong>
+
+          <small>
+            Kirim pesan
+          </small>
+
         </button>
+
 
         <button
           onclick="quickGeneration('angkatan_12')"
         >
+
           <span>🎓</span>
-          <strong>Angkatan 12</strong>
-          <small>Kirim pesan</small>
+
+          <strong>
+            Angkatan 12
+          </strong>
+
+          <small>
+            Kirim pesan
+          </small>
+
         </button>
+
 
         <button
           onclick="quickGeneration('angkatan_13')"
         >
+
           <span>🎓</span>
-          <strong>Angkatan 13</strong>
-          <small>Kirim pesan</small>
+
+          <strong>
+            Angkatan 13
+          </strong>
+
+          <small>
+            Kirim pesan
+          </small>
+
         </button>
 
       </div>
@@ -91,8 +143,15 @@
     </section>
 
 
-    <!-- SEND -->
-    <section id="sendPage" class="page">
+
+    <!-- =========================
+         SEND MESSAGE
+    ========================== -->
+
+    <section
+      id="sendPage"
+      class="page"
+    >
 
       <button
         class="back-btn"
@@ -101,16 +160,23 @@
         ← Kembali
       </button>
 
+
       <div class="card">
 
-        <h2>✉️ Buat Pesan</h2>
+        <h2>
+          ✉️ Buat Pesan
+        </h2>
 
         <p class="muted">
-          Pesanmu akan ditujukan kepada nama yang kamu masukkan.
+          Kirim pesan untuk seseorang.
         </p>
 
 
-        <label>Angkatan</label>
+        <!-- GENERATION -->
+
+        <label>
+          Angkatan
+        </label>
 
         <div class="generation-select">
 
@@ -138,6 +204,8 @@
         </div>
 
 
+        <!-- RECIPIENT -->
+
         <label for="recipient">
           Untuk siapa?
         </label>
@@ -149,6 +217,8 @@
           autocomplete="off"
         >
 
+
+        <!-- SENDER -->
 
         <label for="sender">
           Dari
@@ -172,6 +242,8 @@
 
         </div>
 
+
+        <!-- MESSAGE -->
 
         <label for="message">
           Pesan
@@ -205,8 +277,15 @@
     </section>
 
 
-    <!-- SEARCH -->
-    <section id="searchPage" class="page">
+
+    <!-- =========================
+         SEARCH
+    ========================== -->
+
+    <section
+      id="searchPage"
+      class="page"
+    >
 
       <button
         class="back-btn"
@@ -218,13 +297,17 @@
 
       <div class="search-card">
 
-        <span class="search-icon">🔎</span>
+        <span class="search-icon">
+          🔎
+        </span>
 
-        <h2>Cari Pesan Kamu</h2>
+        <h2>
+          Cari Pesan Kamu
+        </h2>
 
         <p>
-          Masukkan nama untuk melihat pesan
-          yang ditujukan kepadamu.
+          Masukkan nama untuk melihat
+          pesan yang ditujukan kepadamu.
         </p>
 
 
@@ -238,8 +321,8 @@
           >
 
           <button
-            onclick="searchMessages()"
             id="searchBtn"
+            onclick="searchMessages()"
           >
             Cari
           </button>
@@ -249,6 +332,8 @@
       </div>
 
 
+      <!-- HASIL PENCARIAN -->
+
       <div id="results"></div>
 
     </section>
@@ -257,7 +342,7 @@
 
 
   <footer>
-    <p>SendTheMessage • Public Message</p>
+    SendTheMessage • Public Message
   </footer>
 
 
