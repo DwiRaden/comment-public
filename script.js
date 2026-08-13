@@ -21,6 +21,8 @@ const db =
 
 let selectedGeneration = "";
 
+let currentSearchName = "";
+
 
 // ============================================
 // ELEMENTS
@@ -76,9 +78,11 @@ function showNotice(
   noticeTimeout =
     setTimeout(() => {
 
-      notice.className = "notice";
+      notice.className =
+        "notice";
 
     }, 4500);
+
 }
 
 
@@ -95,6 +99,7 @@ function escapeHTML(value) {
     String(value ?? "");
 
   return div.innerHTML;
+
 }
 
 
@@ -117,16 +122,16 @@ function showPage(pageId) {
     document.getElementById(pageId);
 
 
-  if (page) {
+  if (!page) return;
 
-    page.classList.add("active");
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+  page.classList.add("active");
 
-  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 
 }
 
@@ -135,11 +140,15 @@ function showPage(pageId) {
 // QUICK GENERATION
 // ============================================
 
-function quickGeneration(generation) {
+function quickGeneration(
+  generation
+) {
 
   showPage("sendPage");
 
-  selectGeneration(generation);
+  selectGeneration(
+    generation
+  );
 
 }
 
@@ -148,7 +157,9 @@ function quickGeneration(generation) {
 // SELECT GENERATION
 // ============================================
 
-function selectGeneration(generation) {
+function selectGeneration(
+  generation
+) {
 
   selectedGeneration =
     generation;
@@ -177,7 +188,8 @@ function selectGeneration(generation) {
 
 function setAnonymous() {
 
-  sender.value = "Anonymous";
+  sender.value =
+    "Anonymous";
 
 }
 
@@ -186,19 +198,23 @@ function setAnonymous() {
 // COUNTER
 // ============================================
 
-message.addEventListener(
-  "input",
-  () => {
+if (message) {
 
-    messageCounter.textContent =
-      `${message.value.length} / 500`;
+  message.addEventListener(
+    "input",
+    () => {
 
-  }
-);
+      messageCounter.textContent =
+        `${message.value.length} / 500`;
+
+    }
+  );
+
+}
 
 
 // ============================================
-// SEND MESSAGE
+// SEND MAIN MESSAGE
 // ============================================
 
 async function sendMessage() {
@@ -248,7 +264,8 @@ async function sendMessage() {
   }
 
 
-  sendBtn.disabled = true;
+  sendBtn.disabled =
+    true;
 
   sendBtn.textContent =
     "Mengirim...";
@@ -259,28 +276,38 @@ async function sendMessage() {
       .from("messages")
       .insert({
 
-        sender: from,
+        sender:
+          from,
 
-        recipient: to,
+        recipient:
+          to,
 
         generation:
           selectedGeneration,
 
-        content: content
+        content:
+          content,
+
+        parent_id:
+          null
 
       });
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "SEND ERROR:",
+      error
+    );
 
     showNotice(
       "Gagal mengirim pesan: " +
       error.message
     );
 
-    sendBtn.disabled = false;
+    sendBtn.disabled =
+      false;
 
     sendBtn.textContent =
       "Kirim 💌";
@@ -289,9 +316,11 @@ async function sendMessage() {
   }
 
 
-  recipient.value = "";
+  recipient.value =
+    "";
 
-  message.value = "";
+  message.value =
+    "";
 
   messageCounter.textContent =
     "0 / 500";
@@ -309,7 +338,8 @@ async function sendMessage() {
 
   setTimeout(() => {
 
-    sendBtn.disabled = false;
+    sendBtn.disabled =
+      false;
 
     sendBtn.textContent =
       "Kirim 💌";
@@ -339,7 +369,12 @@ async function searchMessages() {
   }
 
 
-  searchBtn.disabled = true;
+  currentSearchName =
+    name;
+
+
+  searchBtn.disabled =
+    true;
 
   searchBtn.textContent =
     "Mencari...";
@@ -353,17 +388,39 @@ async function searchMessages() {
 
 
   const { data, error } =
-    await db.rpc(
-      "search_messages",
-      {
-        p_recipient: name
-      }
-    );
+    await db
+      .from("messages")
+      .select(`
+        id,
+        sender,
+        recipient,
+        generation,
+        content,
+        created_at,
+        parent_id
+      `)
+      .ilike(
+        "recipient",
+        name
+      )
+      .is(
+        "parent_id",
+        null
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "SEARCH ERROR:",
+      error
+    );
 
     results.innerHTML = `
       <div class="empty">
@@ -376,7 +433,8 @@ async function searchMessages() {
       error.message
     );
 
-    searchBtn.disabled = false;
+    searchBtn.disabled =
+      false;
 
     searchBtn.textContent =
       "Cari";
@@ -385,13 +443,14 @@ async function searchMessages() {
   }
 
 
-  renderMessages(
+  await renderMessages(
     data || [],
     name
   );
 
 
-  searchBtn.disabled = false;
+  searchBtn.disabled =
+    false;
 
   searchBtn.textContent =
     "Cari";
@@ -403,12 +462,13 @@ async function searchMessages() {
 // RENDER MESSAGES
 // ============================================
 
-function renderMessages(
+async function renderMessages(
   messages,
   name
 ) {
 
-  results.innerHTML = "";
+  results.innerHTML =
+    "";
 
 
   if (!messages.length) {
@@ -416,7 +476,9 @@ function renderMessages(
     results.innerHTML = `
       <div class="empty">
         Belum ada pesan untuk
-        <strong>${escapeHTML(name)}</strong>.
+        <strong>
+          ${escapeHTML(name)}
+        </strong>.
       </div>
     `;
 
@@ -433,39 +495,42 @@ function renderMessages(
   title.textContent =
     `${messages.length} pesan untuk ${name}`;
 
-  results.appendChild(title);
+  results.appendChild(
+    title
+  );
 
 
-  messages.forEach(
-    item => {
+  for (
+    const item of messages
+  ) {
 
-      results.appendChild(
-        createMessageCard(item)
+    const card =
+      await createMessageCard(
+        item
       );
 
-    }
-  );
+    results.appendChild(
+      card
+    );
+
+  }
 
 }
 
 
 // ============================================
-// MESSAGE CARD
+// CREATE MESSAGE CARD
 // ============================================
 
-function createMessageCard(item) {
+async function createMessageCard(
+  item
+) {
 
   const card =
     document.createElement("article");
 
   card.className =
     "message";
-
-
-  const generation =
-    generationName(
-      item.generation
-    );
 
 
   card.innerHTML = `
@@ -479,13 +544,16 @@ function createMessageCard(item) {
         </div>
 
         <div class="recipient-info">
-          Untuk ${escapeHTML(item.recipient)}
+          Untuk
+          ${escapeHTML(item.recipient)}
         </div>
 
       </div>
 
       <div class="time">
-        ${formatDate(item.created_at)}
+        ${formatDate(
+          item.created_at
+        )}
       </div>
 
     </div>
@@ -497,55 +565,80 @@ function createMessageCard(item) {
 
 
     <span class="generation-tag">
-      ${generation}
+      ${generationName(
+        item.generation
+      )}
     </span>
 
 
-    <br>
-
-
-    <button
-      class="reply-button"
-      onclick="openReply(
-        ${item.id},
-        '${escapeAttribute(item.recipient)}'
-      )"
-    >
-      ↩ Balas pesan
-    </button>
-
-
-    <div
-      class="reply-box"
-      id="reply-${item.id}"
-    >
-
-      <input
-        id="reply-name-${item.id}"
-        maxlength="30"
-        placeholder="Nama kamu"
-      >
-
-      <textarea
-        id="reply-content-${item.id}"
-        maxlength="500"
-        placeholder="Tulis balasan..."
-      ></textarea>
+    <div>
 
       <button
-        class="reply-send"
-        onclick="sendReply(
-          ${item.id},
-          '${escapeAttribute(item.recipient)}',
-          '${escapeAttribute(item.generation)}'
+        class="reply-button"
+        onclick="toggleComments(
+          ${item.id}
         )"
       >
-        Kirim Balasan
+        💬 Komentar
       </button>
 
     </div>
 
+
+    <div
+      class="comments-area"
+      id="comments-${item.id}"
+    >
+
+      <div
+        class="comments-list"
+        id="comments-list-${item.id}"
+      >
+        <div class="empty">
+          Memuat komentar...
+        </div>
+      </div>
+
+
+      <div class="reply-box">
+
+        <input
+          id="reply-name-${item.id}"
+          maxlength="30"
+          placeholder="Nama kamu (opsional)"
+        >
+
+
+        <textarea
+          id="reply-content-${item.id}"
+          maxlength="500"
+          placeholder="Tulis komentar..."
+        ></textarea>
+
+
+        <button
+          class="reply-send"
+          onclick="sendReply(
+            ${item.id}
+          )"
+        >
+          Kirim Komentar
+        </button>
+
+      </div>
+
+    </div>
+
   `;
+
+
+  const commentsArea =
+    card.querySelector(
+      ".comments-area"
+    );
+
+  commentsArea.style.display =
+    "none";
 
 
   return card;
@@ -554,24 +647,38 @@ function createMessageCard(item) {
 
 
 // ============================================
-// OPEN REPLY
+// TOGGLE COMMENTS
 // ============================================
 
-function openReply(
+async function toggleComments(
   id
 ) {
 
-  const box =
+  const area =
     document.getElementById(
-      `reply-${id}`
+      `comments-${id}`
     );
 
 
-  if (box) {
+  if (!area) return;
 
-    box.classList.toggle(
-      "active"
+
+  if (
+    area.style.display ===
+    "none"
+  ) {
+
+    area.style.display =
+      "block";
+
+    await loadComments(
+      id
     );
+
+  } else {
+
+    area.style.display =
+      "none";
 
   }
 
@@ -579,23 +686,164 @@ function openReply(
 
 
 // ============================================
-// SEND REPLY
+// LOAD COMMENTS
+// ============================================
+
+async function loadComments(
+  parentId
+) {
+
+  const list =
+    document.getElementById(
+      `comments-list-${parentId}`
+    );
+
+
+  if (!list) return;
+
+
+  const { data, error } =
+    await db
+      .from("messages")
+      .select(`
+        id,
+        sender,
+        recipient,
+        generation,
+        content,
+        created_at,
+        parent_id
+      `)
+      .eq(
+        "parent_id",
+        parentId
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+
+    console.error(
+      "COMMENTS ERROR:",
+      error
+    );
+
+    list.innerHTML = `
+      <div class="empty">
+        Gagal memuat komentar.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  list.innerHTML =
+    "";
+
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
+
+    list.innerHTML = `
+      <div class="empty">
+        Belum ada komentar.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  data.forEach(
+    comment => {
+
+      const element =
+        createCommentElement(
+          comment
+        );
+
+      list.appendChild(
+        element
+      );
+
+    }
+  );
+
+}
+
+
+// ============================================
+// CREATE COMMENT
+// ============================================
+
+function createCommentElement(
+  comment
+) {
+
+  const div =
+    document.createElement("div");
+
+  div.className =
+    "message-comment";
+
+
+  div.innerHTML = `
+
+    <div class="comment-head">
+
+      <strong>
+        ${escapeHTML(
+          comment.sender
+        )}
+      </strong>
+
+      <span>
+        ${formatDate(
+          comment.created_at
+        )}
+      </span>
+
+    </div>
+
+
+    <div class="comment-content">
+      ${escapeHTML(
+        comment.content
+      )}
+    </div>
+
+  `;
+
+
+  return div;
+
+}
+
+
+// ============================================
+// SEND COMMENT
 // ============================================
 
 async function sendReply(
-  id,
-  recipientName,
-  generation
+  parentId
 ) {
 
   const nameInput =
     document.getElementById(
-      `reply-name-${id}`
+      `reply-name-${parentId}`
     );
 
   const contentInput =
     document.getElementById(
-      `reply-content-${id}`
+      `reply-content-${parentId}`
     );
 
 
@@ -610,37 +858,93 @@ async function sendReply(
   if (!content) {
 
     showNotice(
-      "Balasan tidak boleh kosong."
+      "Komentar tidak boleh kosong."
+    );
+
+    contentInput.focus();
+
+    return;
+  }
+
+
+  /*
+    Ambil pesan utama.
+    Kita hanya mengambil recipient
+    dan generation agar komentar
+    tetap punya data yang valid.
+  */
+
+  const {
+    data: parent,
+    error: parentError
+  } =
+    await db
+      .from("messages")
+      .select(`
+        recipient,
+        generation
+      `)
+      .eq(
+        "id",
+        parentId
+      )
+      .single();
+
+
+  if (parentError) {
+
+    console.error(
+      "PARENT ERROR:",
+      parentError
+    );
+
+    showNotice(
+      "Pesan yang dibalas tidak ditemukan."
     );
 
     return;
   }
 
 
+  /*
+    INSERT KOMENTAR
+
+    parent_id = ID PESAN
+    YANG SEDANG DIBALAS
+  */
+
   const { error } =
     await db
       .from("messages")
       .insert({
 
-        sender: from,
+        sender:
+          from,
 
-        recipient: recipientName,
+        recipient:
+          parent.recipient,
 
         generation:
-          generation,
+          parent.generation,
 
         content:
-          content
+          content,
+
+        parent_id:
+          parentId
 
       });
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "COMMENT ERROR:",
+      error
+    );
 
     showNotice(
-      "Gagal mengirim balasan: " +
+      "Gagal mengirim komentar: " +
       error.message
     );
 
@@ -648,11 +952,18 @@ async function sendReply(
   }
 
 
-  contentInput.value = "";
+  contentInput.value =
+    "";
+
 
   showNotice(
-    "Balasan berhasil dikirim! 💬",
+    "Komentar berhasil dikirim! 💬",
     true
+  );
+
+
+  await loadComments(
+    parentId
   );
 
 }
@@ -662,7 +973,9 @@ async function sendReply(
 // GENERATION NAME
 // ============================================
 
-function generationName(value) {
+function generationName(
+  value
+) {
 
   const names = {
 
@@ -678,40 +991,44 @@ function generationName(value) {
   };
 
 
-  return names[value] ||
+  return (
+    names[value] ||
     value ||
-    "ANGKATAN";
+    "ANGKATAN"
+  );
 
 }
 
 
 // ============================================
-// DATE
+// FORMAT DATE
 // ============================================
 
-function formatDate(value) {
+function formatDate(
+  value
+) {
 
-  return new Date(value)
-    .toLocaleString(
+  try {
+
+    return new Date(
+      value
+    ).toLocaleString(
       "id-ID",
       {
-        dateStyle: "medium",
-        timeStyle: "short"
+        dateStyle:
+          "medium",
+
+        timeStyle:
+          "short"
       }
     );
 
-}
+  } catch {
 
+    return "";
 
-// ============================================
-// ESCAPE ATTRIBUTE
-// ============================================
+  }
 
-function escapeAttribute(value) {
-
-  return String(value ?? "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'");
 }
 
 
@@ -719,26 +1036,89 @@ function escapeAttribute(value) {
 // REALTIME
 // ============================================
 
-db.channel("messages-realtime")
-  .on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "messages"
-    },
-    payload => {
+db.channel(
+  "messages-live"
+)
+.on(
+  "postgres_changes",
+  {
+    event: "INSERT",
+    schema: "public",
+    table: "messages"
+  },
+  async payload => {
 
-      const currentName =
-        searchName.value.trim();
+    const newMessage =
+      payload.new;
 
+
+    /*
+      ==============================
+      KOMENTAR BARU
+      ==============================
+    */
+
+    if (
+      newMessage.parent_id
+    ) {
+
+      const list =
+        document.getElementById(
+          `comments-list-${newMessage.parent_id}`
+        );
+
+
+      if (list) {
+
+        await loadComments(
+          newMessage.parent_id
+        );
+
+      }
+
+
+      return;
+    }
+
+
+    /*
+      ==============================
+      PESAN UTAMA BARU
+      ==============================
+    */
+
+    if (
+      currentSearchName &&
+      String(
+        newMessage.recipient
+      ).toLowerCase() ===
+      String(
+        currentSearchName
+      ).toLowerCase()
+    ) {
+
+      await searchMessages();
+
+    }
+
+  }
+)
+.subscribe();
+
+
+// ============================================
+// ENTER TO SEARCH
+// ============================================
+
+if (searchName) {
+
+  searchName.addEventListener(
+    "keydown",
+    event => {
 
       if (
-        currentName &&
-        payload.new &&
-        String(payload.new.recipient)
-          .toLowerCase() ===
-        currentName.toLowerCase()
+        event.key ===
+        "Enter"
       ) {
 
         searchMessages();
@@ -746,25 +1126,6 @@ db.channel("messages-realtime")
       }
 
     }
-  )
-  .subscribe();
+  );
 
-
-// ============================================
-// ENTER = SEARCH
-// ============================================
-
-searchName.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key === "Enter"
-    ) {
-
-      searchMessages();
-
-    }
-
-  }
-);
+}
