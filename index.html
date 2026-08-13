@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Komentar Publik</title>
+  <title>Public Comment</title>
 
   <link rel="stylesheet" href="style.css">
 
@@ -15,56 +15,174 @@
 
   <main class="container">
 
+    <!-- HEADER -->
     <header class="header">
-      <h1>💬 Komentar Publik</h1>
-      <p>Bagikan pendapat dan balas komentar pengguna lain.</p>
+      <div>
+        <h1>💬 Public Comment</h1>
+        <p>Kirim komentar atau pesan untuk seseorang.</p>
+      </div>
+
+      <div id="connectionStatus" class="status">
+        ● Menghubungkan...
+      </div>
     </header>
 
-    <div id="errorBox" class="error"></div>
 
-    <section class="comment-form">
+    <!-- ERROR / SUCCESS -->
+    <div id="notice" class="notice"></div>
+
+
+    <!-- ========================= -->
+    <!-- PESAN -->
+    <!-- ========================= -->
+
+    <section class="card">
+
+      <h2>📨 Kirim Pesan</h2>
+
+      <p class="description">
+        Kirim pesan kepada seseorang menggunakan kode penerima.
+      </p>
 
       <input
-        id="username"
+        id="messageSender"
         type="text"
         maxlength="30"
-        placeholder="Nama / username"
+        placeholder="Nama kamu"
+        autocomplete="off"
+      >
+
+      <input
+        id="messageRecipient"
+        type="text"
+        maxlength="30"
+        placeholder="Untuk siapa?"
+        autocomplete="off"
+      >
+
+      <input
+        id="recipientCode"
+        type="text"
+        maxlength="30"
+        placeholder="Kode penerima"
         autocomplete="off"
       >
 
       <textarea
-        id="content"
+        id="messageContent"
         maxlength="500"
-        placeholder="Tulis komentar..."
+        placeholder="Tulis pesan..."
       ></textarea>
 
-      <div class="form-bottom">
-        <span id="counter">0 / 500</span>
+      <div class="bottom-row">
 
-        <button id="sendButton">
-          Kirim Komentar
+        <span id="messageCounter">
+          0 / 500
+        </span>
+
+        <button id="sendMessageButton">
+          Kirim Pesan
         </button>
+
       </div>
 
     </section>
 
+
+    <!-- ========================= -->
+    <!-- CARI PESAN -->
+    <!-- ========================= -->
+
+    <section class="card">
+
+      <h2>🔎 Cari Pesan Kamu</h2>
+
+      <p class="description">
+        Masukkan kode penerima untuk melihat pesan yang ditujukan kepadamu.
+      </p>
+
+      <div class="search-row">
+
+        <input
+          id="searchCode"
+          type="text"
+          maxlength="30"
+          placeholder="Masukkan kode penerima"
+          autocomplete="off"
+        >
+
+        <button id="searchButton">
+          Cari
+        </button>
+
+      </div>
+
+      <div id="messageResults"></div>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- KOMENTAR -->
+    <!-- ========================= -->
+
     <section>
 
-      <h2 class="section-title">
-        Komentar
-      </h2>
+      <div class="section-header">
+
+        <div>
+          <h2>💬 Komentar Publik</h2>
+          <p>Komentar terbaru muncul paling atas.</p>
+        </div>
+
+      </div>
+
+
+      <section class="card">
+
+        <input
+          id="username"
+          type="text"
+          maxlength="30"
+          placeholder="Nama / username"
+          autocomplete="off"
+        >
+
+        <textarea
+          id="content"
+          maxlength="500"
+          placeholder="Tulis komentar..."
+        ></textarea>
+
+        <div class="bottom-row">
+
+          <span id="counter">
+            0 / 500
+          </span>
+
+          <button id="sendButton">
+            Kirim Komentar
+          </button>
+
+        </div>
+
+      </section>
+
 
       <div id="comments">
+
         <div class="loading">
           Memuat komentar...
         </div>
+
       </div>
 
     </section>
 
   </main>
 
+
   <script src="script.js"></script>
 
 </body>
-        </html>
+</html>
